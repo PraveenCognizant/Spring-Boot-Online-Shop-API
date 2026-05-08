@@ -1,0 +1,469 @@
+{
+  "info": {
+    "_postman_id": "spring-boot-online-shop",
+    "name": "Spring Boot Online Shop API",
+    "description": "Complete test collection for the Spring Boot learning project.\nCovers Products, Orders, Info, and Actuator endpoints.\n\nSetup:\n1. Run: mvn spring-boot:run (in spring-core-demo/)\n2. Base URL is pre-set to http://localhost:8080\n3. Run 'POST Create Product' first if DB is empty",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "productId",
+      "value": "1",
+      "type": "string",
+      "description": "Update this after creating a product"
+    },
+    {
+      "key": "orderId",
+      "value": "1",
+      "type": "string",
+      "description": "Update this after placing an order"
+    }
+  ],
+  "item": [
+    {
+      "name": "Products",
+      "description": "Full CRUD for Product entity. Demo data is auto-seeded at startup (dev profile).",
+      "item": [
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"]
+            },
+            "description": "Returns all products. 10 demo items are seeded at startup.\nExpected: 200 OK with { success: true, data: [...] }"
+          }
+        },
+        {
+          "name": "Get Product by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "{{productId}}"]
+            },
+            "description": "Get a single product by ID.\nExpected: 200 OK with product object.\nTry ID=9999 → 404 Not Found"
+          }
+        },
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"AirPods Pro\",\n  \"description\": \"Apple wireless earbuds with ANC\",\n  \"price\": 249.99,\n  \"stock\": 80,\n  \"category\": \"Electronics\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"]
+            },
+            "description": "Create a new product.\nExpected: 201 Created with the new product (including auto-generated ID).\n\nValidation tests:\n- Remove 'name' → 400 Bad Request\n- Set price to -1 → 400 Bad Request\n- Set stock to -5 → 400 Bad Request"
+          }
+        },
+        {
+          "name": "Create Product — Validation Error (blank name)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"description\": \"No name provided\",\n  \"price\": 10.0,\n  \"stock\": 5,\n  \"category\": \"Test\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products"]
+            },
+            "description": "Expected: 400 Bad Request with validation error message for 'name' field.\nShows @Valid + Bean Validation in action."
+          }
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"AirPods Pro (Updated)\",\n  \"description\": \"Updated description\",\n  \"price\": 229.99,\n  \"stock\": 100,\n  \"category\": \"Electronics\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "{{productId}}"]
+            },
+            "description": "Replace an existing product with new data.\nExpected: 200 OK with updated product."
+          }
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "{{productId}}"]
+            },
+            "description": "Delete a product by ID.\nExpected: 200 OK with success message.\nTry deleting again → 404 Not Found."
+          }
+        },
+        {
+          "name": "Filter by Category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/category/Electronics",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "category", "Electronics"]
+            },
+            "description": "Get all products in a specific category.\nTry: Electronics, Footwear, Clothing, Books, Sports, Kitchen"
+          }
+        },
+        {
+          "name": "Search by Name",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/search?name=iPhone",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "search"],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "iPhone",
+                  "description": "Case-insensitive partial match"
+                }
+              ]
+            },
+            "description": "Search products whose name contains the query string (case-insensitive).\nTry: iPhone, Nike, Book, Sony"
+          }
+        },
+        {
+          "name": "Filter by Price Range",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/price-range?min=50&max=500",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "price-range"],
+              "query": [
+                {
+                  "key": "min",
+                  "value": "50"
+                },
+                {
+                  "key": "max",
+                  "value": "500"
+                }
+              ]
+            },
+            "description": "Get products with price between min and max, sorted by price ascending.\nUses custom @Query JPQL in ProductRepository."
+          }
+        },
+        {
+          "name": "Low Stock Alert",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/products/low-stock?threshold=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "products", "low-stock"],
+              "query": [
+                {
+                  "key": "threshold",
+                  "value": "10",
+                  "description": "Products with stock <= this value (default: 10)"
+                }
+              ]
+            },
+            "description": "Returns products with stock between 1 and the threshold.\n'Yoga Mat Pro' (stock=3) should appear.\nOut-of-stock items (stock=0) are excluded."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "description": "Place and manage orders. Placing an order deducts stock automatically.\nCancelling restores stock. The OrderPlacedEvent fires on each placement.",
+      "item": [
+        {
+          "name": "Get All Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders"]
+            },
+            "description": "Returns all orders sorted by date (newest first).\nExpected: 200 OK"
+          }
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", "{{orderId}}"]
+            },
+            "description": "Get a single order by ID.\nExpected: 200 OK with Order + nested Product."
+          }
+        },
+        {
+          "name": "Place Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": 1,\n  \"quantity\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders"]
+            },
+            "description": "Place a new order for a product.\nExpected: 201 Created — stock is deducted, OrderPlacedEvent fires (check console log).\n\nBusiness rule tests:\n- quantity=0 → 400 Bad Request\n- quantity > stock → 400 Insufficient stock\n- productId=9999 → 404 Not Found"
+          }
+        },
+        {
+          "name": "Place Order — Insufficient Stock",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": 9,\n  \"quantity\": 999\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders"]
+            },
+            "description": "Product 9 is 'Yoga Mat Pro' with stock=3. Ordering 999 should fail.\nExpected: 400 Bad Request — 'Insufficient stock. Available: 3, Requested: 999'"
+          }
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CONFIRMED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", "{{orderId}}", "status"]
+            },
+            "description": "Update the status of an existing order.\nValid statuses: PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED\nExpected: 200 OK with updated order.\n\nBusiness rule test:\n- Set status on a DELIVERED order → 400 Bad Request"
+          }
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/{{orderId}}/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", "{{orderId}}", "cancel"]
+            },
+            "description": "Cancel an order and restore stock to the product.\nExpected: 200 OK — check product stock increased.\n\nBusiness rule test:\n- Cancel a SHIPPED order → 400 Bad Request"
+          }
+        },
+        {
+          "name": "Filter Orders by Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/status/PENDING",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", "status", "PENDING"]
+            },
+            "description": "Get all orders with a specific status.\nValid values: PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED\nExpected: 200 OK with filtered list."
+          }
+        },
+        {
+          "name": "Get Total Revenue",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders/revenue",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "orders", "revenue"]
+            },
+            "description": "Returns total revenue from CONFIRMED orders only.\nUses custom @Query: SELECT SUM(o.totalAmount) FROM Order o WHERE o.status = 'CONFIRMED'"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Info & Config",
+      "description": "Demonstrates @Value, @ConfigurationProperties, and Environment.",
+      "item": [
+        {
+          "name": "App Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/info",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "info"]
+            },
+            "description": "Shows app name, version, currency, active profiles, and Java version.\nDemonstrates 3 ways to read application.properties:\n1. @Value injection\n2. @ConfigurationProperties (AppProperties)\n3. Spring Environment"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Actuator",
+      "description": "Spring Boot Actuator — production-ready monitoring endpoints.\nEnabled in application.properties: management.endpoints.web.exposure.include=health,info,metrics,env,beans",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/actuator/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["actuator", "health"]
+            },
+            "description": "Returns app health with DB status.\nExpected: { status: UP, components: { db: { status: UP }, ... } }"
+          }
+        },
+        {
+          "name": "App Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/actuator/info",
+              "host": ["{{baseUrl}}"],
+              "path": ["actuator", "info"]
+            },
+            "description": "Returns info.* properties from application.properties.\nShows: app name, version, description."
+          }
+        },
+        {
+          "name": "Metrics Index",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/actuator/metrics",
+              "host": ["{{baseUrl}}"],
+              "path": ["actuator", "metrics"]
+            },
+            "description": "Lists all available metric names.\nPick any name and call /actuator/metrics/{name} for details."
+          }
+        },
+        {
+          "name": "JVM Memory Metric",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/actuator/metrics/jvm.memory.used",
+              "host": ["{{baseUrl}}"],
+              "path": ["actuator", "metrics", "jvm.memory.used"]
+            },
+            "description": "Current JVM heap memory usage in bytes."
+          }
+        },
+        {
+          "name": "HTTP Request Count Metric",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/actuator/metrics/http.server.requests",
+              "host": ["{{baseUrl}}"],
+              "path": ["actuator", "metrics", "http.server.requests"]
+            },
+            "description": "Total HTTP request count and timing stats."
+          }
+        },
+        {
+          "name": "Environment Properties",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/actuator/env",
+              "host": ["{{baseUrl}}"],
+              "path": ["actuator", "env"]
+            },
+            "description": "Shows all environment properties including application.properties values, JVM args, and system env vars."
+          }
+        },
+        {
+          "name": "All Registered Beans",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/actuator/beans",
+              "host": ["{{baseUrl}}"],
+              "path": ["actuator", "beans"]
+            },
+            "description": "Lists every bean registered in the Spring ApplicationContext.\nGreat for understanding what Spring auto-configured."
+          }
+        }
+      ]
+    }
+  ]
+}
