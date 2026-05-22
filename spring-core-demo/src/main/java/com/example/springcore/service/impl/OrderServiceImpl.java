@@ -68,6 +68,8 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Order", "id", id));
     }
 
+
+
     @Override
     public Order placeOrder(Long productId, int quantity) {
         // BUSINESS RULE 1: Product must exist

@@ -25,7 +25,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  *   1. Creates the Spring IoC Container (ApplicationContext)
  *   2. Registers all beans found by @ComponentScan
  *   3. Runs auto-configuration
- *   4. Starts embedded Tomcat on port 8080
+ *   4. Starts embedded Tomcat on port
  *   5. Deploys your REST endpoints
  *
  * RUN: mvn spring-boot:run   OR   java -jar target/spring-core-demo-1.0.jar
